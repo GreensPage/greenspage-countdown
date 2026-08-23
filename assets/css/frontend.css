@@ -1,0 +1,179 @@
+/**
+ * Greenspage Countdown - frontend styles.
+ *
+ * Deliberately minimal and token-driven so it inherits the theme rather than
+ * fighting it. Override the custom properties to restyle without unpicking CSS.
+ */
+
+.gp-cd {
+	--gp-cd-accent: currentColor;
+	--gp-cd-gap: 12px;
+	--gp-cd-num-size: clamp( 28px, 6vw, 46px );
+	--gp-cd-label-size: 12px;
+	--gp-cd-radius: 14px;
+	--gp-cd-box-bg: rgba( 255, 255, 255, 0.72 );
+	--gp-cd-box-shadow: 0 1px 2px rgba( 0, 0, 0, 0.06 );
+	--gp-cd-track: rgba( 0, 0, 0, 0.1 );
+}
+
+.gp-cd__intro {
+	margin: 0 0 0.75em;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.gp-cd__units {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var( --gp-cd-gap );
+	align-items: stretch;
+	justify-content: inherit;
+	margin: 0;
+	padding: 0;
+}
+
+.gp-cd__unit {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-width: 4.5em;
+	flex: 1 1 auto;
+}
+
+.gp-cd__num {
+	display: block;
+	font-size: var( --gp-cd-num-size );
+	font-weight: 700;
+	line-height: 1.05;
+	color: var( --gp-cd-accent );
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: "tnum";
+}
+
+.gp-cd__label {
+	display: block;
+	margin-top: 0.35em;
+	font-size: var( --gp-cd-label-size );
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	opacity: 0.7;
+}
+
+/* Boxes layout */
+
+.gp-cd--boxes .gp-cd__unit {
+	padding: 18px 14px;
+	border-radius: var( --gp-cd-radius );
+	background: var( --gp-cd-box-bg );
+	box-shadow: var( --gp-cd-box-shadow );
+}
+
+/* Inline layout - reads as a sentence rather than a dashboard */
+
+.gp-cd--inline {
+	display: inline-block;
+	vertical-align: baseline;
+}
+
+.gp-cd--inline .gp-cd__units {
+	display: inline-flex;
+	gap: 0.5em;
+	align-items: baseline;
+	flex-wrap: nowrap;
+}
+
+.gp-cd--inline .gp-cd__unit {
+	flex-direction: row;
+	align-items: baseline;
+	gap: 0.25em;
+	min-width: 0;
+	padding: 0;
+	background: none;
+	box-shadow: none;
+}
+
+.gp-cd--inline .gp-cd__num {
+	font-size: 1.25em;
+}
+
+.gp-cd--inline .gp-cd__label {
+	margin-top: 0;
+	font-size: 0.8em;
+	letter-spacing: 0.04em;
+	text-transform: none;
+}
+
+/* Progress */
+
+.gp-cd__progress {
+	margin-top: 16px;
+	height: 6px;
+	border-radius: 999px;
+	background: var( --gp-cd-track );
+	overflow: hidden;
+}
+
+.gp-cd__bar {
+	display: block;
+	width: 0;
+	height: 100%;
+	border-radius: inherit;
+	background: var( --gp-cd-accent );
+	transition: width 0.6s linear;
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+	.gp-cd__bar {
+		transition: none;
+	}
+}
+
+/* Expiry */
+
+.gp-cd__expired {
+	font-size: 1.125rem;
+	font-weight: 600;
+	line-height: 1.5;
+	/* Uses the page's own text colour by default (high contrast), never the
+	   number accent. Set --gp-cd-expired-color on the block to override. */
+	color: var( --gp-cd-expired-color, inherit );
+}
+
+/* The `hidden` attribute must win over the explicit display values above,
+   so the units and progress bar truly disappear on the "swap in a message"
+   expiry rather than sitting behind the message. */
+.gp-cd__units[hidden],
+.gp-cd__progress[hidden] {
+	display: none !important;
+}
+
+.gp-cd.is-expired[hidden] {
+	display: none !important;
+}
+
+/* Screen reader summary. Visible text ticks; this speaks once a minute. */
+
+.gp-cd__sr {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect( 0 0 0 0 );
+	clip-path: inset( 50% );
+	white-space: nowrap;
+	border: 0;
+}
+
+@media ( prefers-color-scheme: dark ) {
+	.gp-cd {
+		--gp-cd-box-bg: rgba( 255, 255, 255, 0.06 );
+		--gp-cd-track: rgba( 255, 255, 255, 0.16 );
+		--gp-cd-box-shadow: none;
+	}
+}
