@@ -24,6 +24,8 @@
 	var CheckboxControl = components.CheckboxControl;
 	var RangeControl = components.RangeControl;
 	var BaseControl = components.BaseControl;
+	var Button = components.Button;
+	var Notice = components.Notice;
 
 	var DATA = window.GPCD_DATA || { countries: [], allTimezones: [], siteTimezone: 'UTC', guessCountry: '' };
 	var ORDER = [ 'days', 'hours', 'minutes', 'seconds' ];
@@ -163,6 +165,45 @@
 		return n < 10 ? '0' + n : String( n );
 	}
 
+	/**
+	 * A usable named IANA zone contains a region ("America/New_York").
+	 * A bare UTC offset ("+05:30") or "UTC" is not something we can suggest.
+	 */
+	function looksNamedZone( tz ) {
+		return typeof tz === 'string' && tz.indexOf( '/' ) !== -1;
+	}
+
+	/**
+	 * The editor's own zone. Used only as a fallback suggestion, never sent
+	 * anywhere. No IP lookup, no geolocation, no network request.
+	 */
+	function browserZone() {
+		try {
+			return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+		} catch ( e ) {
+			return '';
+		}
+	}
+
+	/**
+	 * First-use timezone suggestion.
+	 * Priority: WordPress site timezone -> browser zone (only if the site is
+	 * on a bare offset) -> ask. Always a suggestion, never applied silently.
+	 */
+	function suggestedZone() {
+		if ( looksNamedZone( DATA.siteTimezone ) ) {
+			return { tz: DATA.siteTimezone, source: 'site' };
+		}
+
+		var b = browserZone();
+
+		if ( looksNamedZone( b ) ) {
+			return { tz: b, source: 'browser' };
+		}
+
+		return { tz: '', source: 'none' };
+	}
+
 	function Edit( props ) {
 		var a = props.attributes;
 		var set = props.setAttributes;
@@ -171,6 +212,10 @@
 
 		var tickState = useState( 0 );
 		var setTick = tickState[ 1 ];
+
+		var dismissState = useState( false );
+		var suggestDismissed = dismissState[ 0 ];
+		var setSuggestDismissed = dismissState[ 1 ];
 
 		useEffect( function () {
 			if ( ! a.uid ) {
@@ -215,6 +260,13 @@
 				parts = splitDiff( Math.max( 0, targetTs - Date.now() ), units );
 			}
 		}
+
+		// Timezone clarity. `tz` is the zone the wall-clock above is read in.
+		var activeTz = tz;
+		var suggestion = suggestedZone();
+		var showTzSuggest = ! isEvergreen && ! a.timezone && ! suggestDismissed && !! suggestion.tz;
+		var targetInPast = ! isEvergreen && !! a.targetDate && ! isNaN( targetTs ) && ( targetTs - Date.now() ) < -1000;
+		var tzIsCustom = !! a.timezone && a.timezone !== DATA.siteTimezone;
 
 		function toggleUnit( unit, on ) {
 			var next = ORDER.filter( function ( u ) {
@@ -271,13 +323,39 @@
 					help: __( 'Sets the date format and narrows the timezone list.', 'greenspage-countdown' )
 				} ),
 
+				showTzSuggest && el(
+					Notice,
+					{ status: 'info', isDismissible: false, className: 'gp-cd-editor__tz-suggest' },
+					el( 'div', { style: { marginBottom: '8px' } },
+						( 'site' === suggestion.source
+							? __( 'Site timezone detected: ', 'greenspage-countdown' )
+							: __( 'Suggested timezone (from this browser): ', 'greenspage-countdown' ) ),
+						el( 'strong', null, suggestion.tz )
+					),
+					el( 'div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } },
+						el( Button, {
+							variant: 'primary',
+							onClick: function () {
+								set( { timezone: suggestion.tz } );
+							}
+						}, __( 'Use this timezone', 'greenspage-countdown' ) ),
+						el( Button, {
+							variant: 'secondary',
+							onClick: function () {
+								setSuggestDismissed( true );
+							}
+						}, __( 'Choose another', 'greenspage-countdown' ) )
+					)
+				),
+
 				! isEvergreen && el( SelectControl, {
 					label: __( 'Timezone', 'greenspage-countdown' ),
 					value: a.timezone,
 					options: timezoneOptions( a.country ),
 					onChange: function ( v ) {
 						set( { timezone: v } );
-					}
+					},
+					help: __( 'Sets the actual moment the countdown reaches zero. Country only changes the date format — one country can span several zones.', 'greenspage-countdown' )
 				} ),
 
 				! isEvergreen && el( TextControl, {
@@ -286,13 +364,30 @@
 					value: a.targetDate,
 					onChange: function ( v ) {
 						set( { targetDate: v } );
-					}
+					},
+					help: __( 'Clock time is read in ', 'greenspage-countdown' ) + activeTz + ( tzIsCustom ? __( ' (not your site timezone)', 'greenspage-countdown' ) : '' )
 				} ),
 
-				! isEvergreen && a.targetDate && el(
+				! isEvergreen && a.targetDate && ! targetInPast && el(
 					'p',
 					{ className: 'gp-cd-editor__notice' },
 					prettyTarget( a.targetDate, tz )
+				),
+
+				targetInPast && el(
+					Notice,
+					{ status: 'warning', isDismissible: false, className: 'gp-cd-editor__tz-past' },
+					el( 'div', { style: { marginBottom: ( tzIsCustom && looksNamedZone( DATA.siteTimezone ) ) ? '8px' : 0 } },
+						__( 'That time has already passed in ', 'greenspage-countdown' ),
+						el( 'strong', null, activeTz ),
+						'.'
+					),
+					( tzIsCustom && looksNamedZone( DATA.siteTimezone ) ) && el( Button, {
+						variant: 'secondary',
+						onClick: function () {
+							set( { timezone: DATA.siteTimezone } );
+						}
+					}, __( 'Switch to site timezone (', 'greenspage-countdown' ) + DATA.siteTimezone + ')' )
 				),
 
 				isEvergreen && el( TextControl, {

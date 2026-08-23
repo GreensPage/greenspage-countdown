@@ -63,6 +63,11 @@ Insert the "Launch Hero + Countdown" pattern from the block inserter (Patterns -
 = 1.1.1 =
 * Fixed: the expiry message now uses the page's own text colour for reliable contrast, instead of the number accent colour. New --gp-cd-expired-color variable to override per block.
 * Fixed: on the "swap in a message" expiry, the countdown boxes now hide correctly instead of remaining behind the message.
+* Editor: the date field now states which timezone the clock time is read in, so short (sub-hour) countdowns are no longer thrown off by a stale timezone.
+* Editor: first-use timezone suggestion — offers the WordPress site timezone (browser zone only as a fallback), applied only when you confirm it. No IP lookup, no network, no tracking.
+* Editor: a target time that has already passed in the chosen timezone now shows a clear warning (with a one-click switch to the site timezone) instead of a silent row of zeroes.
+* Editor: clarified that Country sets the date format while Timezone sets the actual moment zero is reached.
+* Admin: the plugin's "Visit plugin site" link now opens the product page in a new tab (this plugin's row only).
 * Added: automatic update notifications, delivered from Greenspage's GitHub releases. No account or token required.
 * Plugin page moved to https://greenspage.com/plugins/countdown/.
 

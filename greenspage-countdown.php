@@ -146,6 +146,37 @@ function gpcd_boot_updater() {
 add_action( 'init', 'gpcd_boot_updater' );
 
 /**
+ * Open this plugin's "Visit plugin site" row link in a new tab.
+ *
+ * Scoped strictly to this plugin's row and to the Plugin URI link only, so it
+ * never alters WordPress admin links globally or other plugins' rows.
+ *
+ * @param string[] $meta Plugin row meta links (HTML).
+ * @param string   $file Plugin basename for the current row.
+ * @return string[]
+ */
+function gpcd_plugin_row_meta( $meta, $file ) {
+	if ( plugin_basename( GPCD_FILE ) !== $file ) {
+		return $meta;
+	}
+
+	foreach ( $meta as $i => $html ) {
+		// Only the "Visit plugin site" link points at the product page; the
+		// author link points at the site root, so it is left untouched.
+		if ( false !== strpos( $html, 'greenspage.com/plugins/countdown' ) ) {
+			$meta[ $i ] = sprintf(
+				'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+				esc_url( 'https://greenspage.com/plugins/countdown/' ),
+				esc_html__( 'Visit plugin site', 'greenspage-countdown' )
+			);
+		}
+	}
+
+	return $meta;
+}
+add_filter( 'plugin_row_meta', 'gpcd_plugin_row_meta', 10, 2 );
+
+/**
  * Resolve the timezone a block should use.
  *
  * @param array $attr Block attributes.
