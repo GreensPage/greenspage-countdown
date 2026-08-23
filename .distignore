@@ -1,0 +1,9 @@
+/.git
+/.github
+/.gitignore
+/.gitattributes
+/.distignore
+/bin
+/build
+/README.md
+/.DS_Store
