@@ -67,24 +67,63 @@ function gpcd_countries() {
 		'EG' => array( 'Egypt', 'j F Y', array( 'Africa/Cairo' ) ),
 	);
 
+	/**
+	 * Filter the country list, so a site can add or trim entries.
+	 *
+	 * @param array $map Country map.
+	 */
 	return apply_filters( 'gpcd_countries', $map );
 }
 
+/**
+ * Build the payload handed to the editor script.
+ *
+ * @return array
+ */
 function gpcd_editor_country_payload() {
 	$out = array();
+
 	foreach ( gpcd_countries() as $code => $row ) {
-		$out[] = array( 'code' => $code, 'label' => $row[0], 'format' => $row[1], 'timezones' => $row[2] );
+		$out[] = array(
+			'code'      => $code,
+			'label'     => $row[0],
+			'format'    => $row[1],
+			'timezones' => $row[2],
+		);
 	}
-	usort( $out, static function ( $a, $b ) { return strcmp( $a['label'], $b['label'] ); } );
+
+	usort(
+		$out,
+		static function ( $a, $b ) {
+			return strcmp( $a['label'], $b['label'] );
+		}
+	);
+
 	return $out;
 }
 
-function gpcd_all_timezones() { return timezone_identifiers_list(); }
+/**
+ * Every timezone identifier, for the "Other" escape hatch.
+ *
+ * @return array
+ */
+function gpcd_all_timezones() {
+	return timezone_identifiers_list();
+}
 
+/**
+ * Resolve the country a block should default to, based on the site timezone.
+ *
+ * @return string Country code, or empty string when nothing matches.
+ */
 function gpcd_guess_country() {
 	$site_tz = wp_timezone_string();
+
 	foreach ( gpcd_countries() as $code => $row ) {
-		if ( in_array( $site_tz, $row[2], true ) ) { return $code; }
+		if ( in_array( $site_tz, $row[2], true ) ) {
+			return $code;
+		}
 	}
+
 	return '';
 }
