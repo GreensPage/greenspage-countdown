@@ -20,7 +20,7 @@ A WordPress countdown block that is quick to configure and honest about what hap
 ## Install
 
 Download the latest release asset named **`greenspage-countdown.zip`** from the
-[Releases](https://github.com/greenspage/greenspage-countdown/releases/latest) page,
+[Releases](https://github.com/GreensPage/greenspage-countdown/releases/latest) page,
 then in WordPress go to **Plugins → Add Plugin → Upload Plugin**.
 
 Do **not** install GitHub's automatically generated **Source code (zip)** or
@@ -41,8 +41,8 @@ Releases are automated. Bump the version in `greenspage-countdown.php` and
 `readme.txt`, commit, then tag:
 
 ```bash
-git tag v1.1.2
-git push origin v1.1.2
+git tag v1.1.3
+git push origin v1.1.3
 ```
 
 The release workflow builds `greenspage-countdown.zip` (excluding dev tooling in

@@ -147,8 +147,6 @@ final class GPCD_Updater {
 	 * @return string Download URL, or empty string.
 	 */
 	private function find_asset( $assets ) {
-		$expected_prefix = 'https://github.com/' . $this->repo . '/releases/download/';
-
 		foreach ( (array) $assets as $asset ) {
 			if ( ! isset( $asset['name'], $asset['browser_download_url'] ) ) {
 				continue;
@@ -160,15 +158,65 @@ final class GPCD_Updater {
 
 			$url = (string) $asset['browser_download_url'];
 
-			// The download URL must belong to THIS repository's releases on
-			// github.com. This prevents a spoofed asset URL from ever becoming
-			// the update package.
-			if ( 0 === strpos( $url, $expected_prefix ) ) {
+			if ( $this->is_valid_asset_url( $url ) ) {
 				return esc_url_raw( $url );
 			}
 		}
 
 		return '';
+	}
+
+	/**
+	 * Validate that a release asset belongs to this exact GitHub repository.
+	 *
+	 * GitHub owner/repository names are case-insensitive, but every other part
+	 * of the package URL remains strict so a look-alike host or repository can
+	 * never become an update source.
+	 *
+	 * @param string $url Candidate browser download URL.
+	 * @return bool
+	 */
+	private function is_valid_asset_url( $url ) {
+		$parts = parse_url( (string) $url );
+
+		if ( false === $parts || ! is_array( $parts ) ) {
+			return false;
+		}
+
+		if ( empty( $parts['scheme'] ) || 'https' !== strtolower( (string) $parts['scheme'] ) ) {
+			return false;
+		}
+
+		if ( empty( $parts['host'] ) || 'github.com' !== strtolower( (string) $parts['host'] ) ) {
+			return false;
+		}
+
+		// Reject credentials, alternate ports, queries and fragments outright.
+		foreach ( array( 'user', 'pass', 'port', 'query', 'fragment' ) as $forbidden ) {
+			if ( isset( $parts[ $forbidden ] ) ) {
+				return false;
+			}
+		}
+
+		$repo_parts = explode( '/', trim( $this->repo, '/' ) );
+		if ( 2 !== count( $repo_parts ) || empty( $repo_parts[0] ) || empty( $repo_parts[1] ) ) {
+			return false;
+		}
+
+		$path = isset( $parts['path'] ) ? (string) $parts['path'] : '';
+		if ( ! preg_match( '#^/([^/]+)/([^/]+)/releases/download/([^/]+)/([^/]+)$#', $path, $matches ) ) {
+			return false;
+		}
+
+		if ( 0 !== strcasecmp( $repo_parts[0], $matches[1] ) || 0 !== strcasecmp( $repo_parts[1], $matches[2] ) ) {
+			return false;
+		}
+
+		if ( '' === $matches[3] || $this->asset !== $matches[4] ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

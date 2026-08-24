@@ -4,7 +4,7 @@ Tags: countdown, timer, launch, evergreen, deadline
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 
 A countdown block that is quick to set up and honest about what happens when it runs out.
@@ -60,6 +60,9 @@ Those days roll into hours rather than disappearing, so a three-day countdown sh
 Insert the "Launch Hero + Countdown" pattern from the block inserter (Patterns -> Greenspage). It seeds a live date two Fridays out so it never shows a frozen clock; change it in the countdown block's sidebar.
 
 == Changelog ==
+
+= 1.1.3 =
+* Fixed: GitHub release asset validation now accepts GitHub's canonical owner-name casing, allowing update notifications to detect new releases correctly.
 
 = 1.1.2 =
 * Maintenance: clarified installation instructions so the canonical `greenspage-countdown.zip` release asset is not confused with GitHub's auto-generated source archives.

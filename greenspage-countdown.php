@@ -3,7 +3,7 @@
  * Plugin Name:       Greenspage Countdown
  * Plugin URI:        https://greenspage.com/plugins/countdown/
  * Description:       A countdown block that is quick to set up and honest about what happens when it runs out. Fixed-date and evergreen modes, country-aware date formats and timezones, optional progress bar, and real expiry behaviour.
- * Version:           1.1.2
+ * Version:           1.1.3
  * Requires at least: 6.3
  * Requires PHP:      7.4
  * Author:            Greenspage Web & SEO
@@ -17,11 +17,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'GPCD_VERSION', '1.1.2' );
+define( 'GPCD_VERSION', '1.1.3' );
 define( 'GPCD_FILE', __FILE__ );
 define( 'GPCD_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GPCD_URL', plugin_dir_url( __FILE__ ) );
-define( 'GPCD_GH_REPO', 'greenspage/greenspage-countdown' );
+define( 'GPCD_GH_REPO', 'GreensPage/greenspage-countdown' );
 
 require_once GPCD_DIR . 'includes/countries.php';
 require_once GPCD_DIR . 'includes/patterns.php';
